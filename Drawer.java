@@ -3,24 +3,24 @@ import java.awt.*;
 
 public class Drawer extends JPanel {
 
-    public static int WIDTH;
-    public static int HEIGHT;
-    public static final double FRICTION=0.99;//0.99
-    public static final double GRAVITY=0.25;//0.25
-    public static final double MAX_WIND=0.15;//0.15
-    public static final int COLUMNS=25;//5
-    public static final int ROWS =30;//6
-    public static final int POINTS=ROWS*COLUMNS;
-    public static final int LENGTH=20;//100
-    public static final double STICK_STIFFNESS=0.5;//0.8
-    public static final double DIAGONAL_STIFFNESS=0.002;//0.001
-    public static final int DELAY = 5;
-    public static final boolean ENLARGE_POINTS = false;
+    static int WIDTH;
+    static int HEIGHT;
+    static final double FRICTION=0.99;//0.99
+    static final double GRAVITY=0.25;//0.25
+    static final double MAX_WIND=0.15;//0.15
+    static final int COLUMNS=25;//5
+    static final int ROWS =30;//6
+    static final int POINTS=ROWS*COLUMNS;
+    static final int LENGTH=20;//100
+    static final double STICK_STIFFNESS=0.5;//0.8
+    static final double DIAGONAL_STIFFNESS=0.002;//0.001
+    static final int DELAY = 5;
+    static final boolean ENLARGE_POINTS = false;
 
-    public static Point[] points=new Point[POINTS];
-    public static Stick[] sticks=new Stick[(ROWS-1)*COLUMNS+POINTS-ROWS];
-    public static Stick[] diagonals=new Stick[(COLUMNS-1)*(ROWS-1)*2];
-    public static int COUNT = 0;
+    static Point[] points=new Point[POINTS];
+    static Stick[] sticks=new Stick[(ROWS-1)*COLUMNS+POINTS-ROWS];
+    static Stick[] diagonals=new Stick[(COLUMNS-1)*(ROWS-1)*2];
+    static int COUNT = 0;
 
     public static void init(){
         //setting points
