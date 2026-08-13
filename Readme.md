@@ -10,19 +10,21 @@ Points are arranged in a grid and connected by sticks that resist stretching. Ev
 
 ## Features
 
-- **Verlet integration** — position-based physics with implicit velocity (`v = x - x_old`)
+- **Verlet integration** - position-based physics with implicit velocity (`v = x - x_old`)
 - **Two constraint layers**
-    - *Structural sticks* — horizontal/vertical neighbors, resist stretching, drawn on screen
-    - *Diagonal sticks* — cross-bracing between diagonal neighbors, very low stiffness, prevents the mesh from shearing into a parallelogram without stiffening the whole cloth
-- **Periodic wind gusts** — wind strength ramps up and down on a repeating cycle rather than blowing constantly, with a bit of randomness layered on top
-- **Fixed top pins** — two points along the top edge stay fixed, letting the rest of the sheet hang and billow
-- **Configurable rendering** — points can optionally be drawn as circles (`ENLARGE_POINTS`); sticks are always drawn as lines
+   - *Structural sticks* - horizontal/vertical neighbors, resist stretching, drawn on screen
+   - *Diagonal sticks* - cross-bracing between diagonal neighbors, very low stiffness, prevents the mesh from shearing into a parallelogram without stiffening the whole cloth
+- **Periodic wind gusts** - wind strength ramps up and down on a repeating cycle rather than blowing constantly, with a bit of randomness layered on top
+- **Fixed top pins** - two points along the top edge stay fixed, letting the rest of the sheet hang and billow
+- **Configurable rendering** - points can optionally be drawn as circles (`ENLARGE_POINTS`); sticks are always drawn as lines
+- **Live FPS counter** - actual frame time is measured each frame (via `System.nanoTime()`) and drawn on screen, rather than assumed from `DELAY`
+- **Centralized configuration** - all tunable constants live in `Main.java` and are referenced from `Drawer.java`, `Point.java`, and `Stick.java` via `Main.<CONSTANT>`
 
 ## Project structure
 
 | File | Responsibility |
 |---|---|
-| `Main.java` | Application entry point, creates the window (`JFrame`) |
+| `Main.java` | Application entry point, creates the window (`JFrame`), holds all tunable simulation constants |
 | `Drawer.java` | Simulation loop, grid setup, constraint solving, rendering, wind |
 | `Point.java` | A single mass point: position, previous position, velocity, fixed state |
 | `Stick.java` | A constraint between two points: rest length, stiffness, relaxation |
@@ -38,7 +40,7 @@ Points are arranged in a grid and connected by sticks that resist stretching. Ev
     - Derive velocity from the previous frame's displacement (Verlet)
     - Apply wind (`wind(COUNT)`) and gravity to velocity, then damp with friction
     - Integrate position (`x += vx`, `y += vy`)
-    - Relax all structural sticks over 100 iterations, then all diagonal sticks over 100 iterations
+    - Relax all structural sticks over 10 iterations, then all diagonal sticks over 100 iterations
     - Sleep `DELAY` ms, then request the next frame
 3. **Wind function** (`wind`) — produces a slow ramping gust roughly once every 4 cycles of `COUNT % 200`, rather than constant wind; see [Wind behavior](#wind-behavior) below.
 
@@ -58,19 +60,20 @@ public static double wind(int COUNT){
 
 ## Configuration
 
-Key constants live at the top of `Drawer.java`:
+Key constants live at the top of `Main.java`:
 
 ```java
-static final double FRICTION = 0.99;
-static final double GRAVITY = 0.25;
-static final double MAX_WIND = 0.15;
-static final int COLUMNS = 25;
-static final int ROWS = 30;
-static final int LENGTH = 20;             
-static final double STICK_STIFFNESS = 0.5;
-static final double DIAGONAL_STIFFNESS = 0.002;
-static final int DELAY = 5;               
-static final boolean ENLARGE_POINTS = false;
+public static final double FRICTION = 0.995;
+public static final double GRAVITY = 0.25;
+public static final double MAX_WIND = 0.15;
+public static final int COLUMNS = 25;
+public static final int ROWS = 30;
+public static final int POINTS = ROWS * COLUMNS;   // 750
+public static final int LENGTH = 20;               // spacing between points, px
+public static final double STICK_STIFFNESS = 0.8;
+public static final double DIAGONAL_STIFFNESS = 0.001;
+public static final int DELAY = 2;                 // ms slept per frame
+public static final boolean ENLARGE_POINTS = false;
 ```
 
 Tuning notes:
@@ -78,7 +81,7 @@ Tuning notes:
 - `DIAGONAL_STIFFNESS` is intentionally tiny as it only needs to resist shear, not dominate the structural sticks. Raising it noticeably stiffens the whole mesh and makes it less cloth-like.
 - Lower `DELAY` - faster simulation speed (more frames per second, not physically scaled).
 - `ROWS`/`COLUMNS`/`LENGTH` control the size of the cloth in points and pixels, the two fixed points (`points[0]`, `points[COLUMNS-1]`) are always the first and last of the top row regardless of grid size.
-
+- With the current `ROWS`/`COLUMNS`, the grid has 750 points and roughly 2,837 total constraints (1,445 structural + 1,392 diagonal).
 
 ## Known limitations / ideas for improvement
 

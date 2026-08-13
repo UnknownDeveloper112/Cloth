@@ -3,60 +3,50 @@ import java.awt.*;
 
 public class Drawer extends JPanel {
 
-    static int WIDTH;
-    static int HEIGHT;
-    static final double FRICTION=0.99;//0.99
-    static final double GRAVITY=0.25;//0.25
-    static final double MAX_WIND=0.15;//0.15
-    static final int COLUMNS=25;//5
-    static final int ROWS =30;//6
-    static final int POINTS=ROWS*COLUMNS;
-    static final int LENGTH=20;//100
-    static final double STICK_STIFFNESS=0.5;//0.8
-    static final double DIAGONAL_STIFFNESS=0.002;//0.001
-    static final int DELAY = 5;
-    static final boolean ENLARGE_POINTS = false;
-
-    static Point[] points=new Point[POINTS];
-    static Stick[] sticks=new Stick[(ROWS-1)*COLUMNS+POINTS-ROWS];
-    static Stick[] diagonals=new Stick[(COLUMNS-1)*(ROWS-1)*2];
+    public static int WIDTH;
+    public static int HEIGHT;
+    static Point[] points=new Point[Main.POINTS];
+    static Stick[] sticks=new Stick[(Main.ROWS-1)* Main.COLUMNS+ Main.POINTS- Main.ROWS];
+    static Stick[] diagonals=new Stick[(Main.COLUMNS-1)*(Main.ROWS-1)*2];
     static int COUNT = 0;
+    static double frameRate;
+    static double time = 0;
 
     public static void init(){
         //setting points
-        for (int row = 0; row < ROWS; row++) {
-            for (int col = 0; col < COLUMNS; col++) {
-                points[row * COLUMNS + col] = new Point(WIDTH / 2.0 + (col - COLUMNS/2) * LENGTH, LENGTH * row + 50, false);
+        for (int row = 0; row < Main.ROWS; row++) {
+            for (int col = 0; col < Main.COLUMNS; col++) {
+                points[row * Main.COLUMNS + col] = new Point(WIDTH / 2.0 + (col - Main.COLUMNS/2) * Main.LENGTH, Main.LENGTH * row + 50, false);
             }
         }
 
         //setting sticks
         int j = 0;
-        for (int row = 0; row < ROWS; row++) {
-            for (int column = 0; column < COLUMNS; column++) {
-                if (column + 1 < COLUMNS) {
-                    sticks[j++] = new Stick(points[row * COLUMNS + column], points[row * COLUMNS + column + 1], true,STICK_STIFFNESS);
+        for (int row = 0; row < Main.ROWS; row++) {
+            for (int column = 0; column < Main.COLUMNS; column++) {
+                if (column + 1 < Main.COLUMNS) {
+                    sticks[j++] = new Stick(points[row * Main.COLUMNS + column], points[row * Main.COLUMNS + column + 1], true, Main.STICK_STIFFNESS);
                 }
-                if (row + 1 < ROWS) {
-                    sticks[j++] = new Stick(points[row * COLUMNS + column], points[row * COLUMNS + column + COLUMNS], true,STICK_STIFFNESS);
+                if (row + 1 < Main.ROWS) {
+                    sticks[j++] = new Stick(points[row * Main.COLUMNS + column], points[row * Main.COLUMNS + column + Main.COLUMNS], true, Main.STICK_STIFFNESS);
                 }
             }
         }
 
         //setting diagonlas
         j = 0;
-        for (int row = 0; row < ROWS; row++) {
-            for (int column = 0; column < COLUMNS -1; column++) {
-                if (row + 1 < ROWS) {
-                    diagonals[j++] = new Stick(points[row * COLUMNS + column], points[(row+1) * COLUMNS + column + 1], true,DIAGONAL_STIFFNESS);
-                    diagonals[j++] = new Stick(points[(row+1) * COLUMNS + column], points[row * COLUMNS + column + 1], true,DIAGONAL_STIFFNESS);
+        for (int row = 0; row < Main.ROWS; row++) {
+            for (int column = 0; column < Main.COLUMNS -1; column++) {
+                if (row + 1 < Main.ROWS) {
+                    diagonals[j++] = new Stick(points[row * Main.COLUMNS + column], points[(row+1) * Main.COLUMNS + column + 1], true, Main.DIAGONAL_STIFFNESS);
+                    diagonals[j++] = new Stick(points[(row+1) * Main.COLUMNS + column], points[row * Main.COLUMNS + column + 1], true, Main.DIAGONAL_STIFFNESS);
                 }
             }
         }
 
         //declaring fixed points and disabled sticks
         points[0].fixed(true);
-        points[COLUMNS -1].fixed(true);
+        points[Main.COLUMNS -1].fixed(true);
     }
 
     public void paintComponent(Graphics g){
@@ -71,7 +61,7 @@ public class Drawer extends JPanel {
         g.setColor(Color.BLACK);
         g.fillRect(0,0,WIDTH,HEIGHT);
         g.setColor(Color.CYAN);
-        if(ENLARGE_POINTS) for (Point point : points) g.drawArc((int)point.x-5,(int)point.y-5,10,10,0,360);
+        if(Main.ENLARGE_POINTS) for (Point point : points) g.drawArc((int)point.x-5,(int)point.y-5,10,10,0,360);
         for (Stick stick : sticks)if(stick.enabled) g.drawLine((int)stick.startX, (int)stick.startY, (int)stick.endX, (int)stick.endY);
 
         //Changing math variables and moving points
@@ -84,29 +74,35 @@ public class Drawer extends JPanel {
             point.oldY=point.y;
 
             if(!point.fixed)point.vx+=WIND;
-            if(!point.fixed)point.vy+=GRAVITY;
-            if(!point.fixed)point.vy*=FRICTION;
-            if(!point.fixed)point.vx*=FRICTION;
+            if(!point.fixed)point.vy+= Main.GRAVITY;
+            if(!point.fixed)point.vy*= Main.FRICTION;
+            if(!point.fixed)point.vx*= Main.FRICTION;
             point.y+=point.vy;
             point.x+=point.vx;
         }
-        for(int i=0;i<100;i++) {
+        for(int i=0;i<10;i++) {
             for (Stick stick : sticks) {
                 if (stick.enabled) stick.sticks();
             }
         }
         for (Stick stick : sticks) if (stick.enabled) stick.editStick();
 
-        for(int i=0;i<100;i++) {
+        for(int i=0;i<10;i++) {
             for (Stick stick : diagonals) {
                 if (stick.enabled) stick.sticks();
             }
         }
         for (Stick stick : diagonals) if (stick.enabled) stick.editStick();
 
+        frameRate=Math.round(10000000000D/(System.nanoTime()-time))/10.0;
+        time=System.nanoTime();
+        g.setColor(Color.GREEN);
+        g.setFont(new Font("Arial",Font.PLAIN,25));
+        g.drawString(Double.toString(frameRate),10,HEIGHT-10);
+
         //Delay
         try {
-            Thread.sleep(DELAY);
+            Thread.sleep(Main.DELAY);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -116,8 +112,8 @@ public class Drawer extends JPanel {
     }
 
     public static double wind(int COUNT){
-        double base = MAX_WIND*(COUNT%200)/200;
-        if(!((COUNT/200)%4>=3)) base = 0;
+        double base = Main.MAX_WIND*(COUNT%200)/200;
+        if(!((COUNT/200)%5>=4)) return 0;
         return base + ((1-2*Math.random())*(COUNT%200)/2000);
     }
 }
