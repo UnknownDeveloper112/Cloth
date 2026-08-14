@@ -42,7 +42,7 @@ Points are arranged in a grid and connected by sticks that resist stretching. Ev
     - Integrate position (`x += vx`, `y += vy`)
     - Relax all structural sticks over 10 iterations, then all diagonal sticks over 100 iterations
     - Sleep `DELAY` ms, then request the next frame
-3. **Wind function** (`wind`) — produces a slow ramping gust roughly once every 4 cycles of `COUNT % 200`, rather than constant wind; see [Wind behavior](#wind-behavior) below.
+3. **Wind function** (`wind`) — produces a slow ramping gust roughly once every 4 cycles of `COUNT % 200`, rather than constant wind, see [Wind behavior](#wind-behavior) below.
 
 ## Wind behavior
 
@@ -54,7 +54,7 @@ public static double wind(int COUNT){
 }
 ```
 
-- `COUNT % 200` creates a 200-frame cycle; wind ramps linearly from `0` to `MAX_WIND` across that cycle.
+- `COUNT % 200` creates a 200-frame cycle, wind ramps linearly from `0` to `MAX_WIND` across that cycle.
 - `(COUNT / 200) % 4 >= 3` only lets the ramp through on 1 out of every 4 cycles — so wind blows in gusts separated by calmer stretches, rather than continuously.
 - The final term adds small random jitter that grows alongside the gust, so stronger gusts are also slightly noisier.
 
@@ -68,11 +68,11 @@ public static final double GRAVITY = 0.25;
 public static final double MAX_WIND = 0.15;
 public static final int COLUMNS = 25;
 public static final int ROWS = 30;
-public static final int POINTS = ROWS * COLUMNS;   // 750
-public static final int LENGTH = 20;               // spacing between points, px
+public static final int POINTS = ROWS * COLUMNS;   
+public static final int LENGTH = 20;               
 public static final double STICK_STIFFNESS = 0.8;
 public static final double DIAGONAL_STIFFNESS = 0.001;
-public static final int DELAY = 2;                 // ms slept per frame
+public static final int DELAY = 2;                 
 public static final boolean ENLARGE_POINTS = false;
 ```
 
